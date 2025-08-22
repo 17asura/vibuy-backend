@@ -1,0 +1,90 @@
+// Define a ligação à base de dados
+datasource db {
+  provider = "postgresql"          // O tipo de base de dados (PostgreSQL neste caso)
+  url      = env("DATABASE_URL")   // A ligação (connection string) vem da variável de ambiente
+}
+
+// Gera o cliente do Prisma para interagir com a DB em JavaScript/TypeScript
+generator client {
+  provider = "prisma-client-js"    // Gera código para usar no NestJS
+}
+
+// -----------------------------
+// MODELO DE UTILIZADOR
+// -----------------------------
+model User {
+  id              Int       @id @unique @default(autoincrement())   // ID único com autoincremento
+  email           String    @unique                                 // Email único (não pode repetir)
+  email_verify    Boolean   @default(false)                         // Se o email foi verificado com link
+  terms_verify    Boolean   @default(false)                         // Verificação dos termos
+  hashed_password String                                            // Password guardada (em hash)
+  name            String                                            // Nome do utilizador
+  followers       Int       @default(0)                             // Número de seguidores (inicialmente 0)
+  createdAt       DateTime  @default(now())                         // Data/hora em que a conta foi criada
+
+  // Relacionamentos
+  videos      Video[]                           // Um utilizador pode ter vários vídeos
+  comments    Comment[]                         // Um utilizador pode fazer vários comentários
+  likes       Like[]                            // Um utilizador pode dar vários likes
+  settings    Setting?                          // Cada utilizador pode ter 1 configuração (ou nenhuma ainda)
+}
+
+// -----------------------------
+// MODELO DE VÍDEO
+// -----------------------------
+model Video {
+  id          String    @id @default(uuid())   // ID único do vídeo
+  title       String                           // Título do vídeo
+  videoUrl    String                           // Caminho ou link do ficheiro do vídeo
+  createdAt   DateTime  @default(now())        // Data/hora da publicação
+  likesCount  Int       @default(0)            // Contador de likes (para performance)
+
+  // Relacionamentos
+  authorId    Int                           // ID do autor do vídeo
+  author      User      @relation(fields: [authorId], references: [id]) // Liga o vídeo ao autor
+  comments    Comment[]                         // Um vídeo pode ter vários comentários
+  likes       Like[]                            // Um vídeo pode ter vários likes
+}
+
+// -----------------------------
+// MODELO DE COMENTÁRIOS
+// -----------------------------
+model Comment {
+  id        String   @id @default(uuid())     // ID único do comentário
+  content   String                           // Texto do comentário
+  createdAt DateTime @default(now())          // Data/hora da publicação
+
+  // Relacionamentos
+  videoId   String                           // ID do vídeo comentado
+  video     Video    @relation(fields: [videoId], references: [id]) // Liga o comentário ao vídeo
+  userId    Int                           // ID do utilizador que comentou
+  user      User     @relation(fields: [userId], references: [id]) // Liga o comentário ao utilizador
+}
+
+// -----------------------------
+// MODELO DE LIKES
+// -----------------------------
+model Like {
+  id        String   @id @default(uuid())     // ID único do like
+  createdAt DateTime @default(now())          // Data/hora em que o like foi dado
+
+  // Relacionamentos
+  videoId   String                           // ID do vídeo gostado
+  video     Video    @relation(fields: [videoId], references: [id]) // Liga o like ao vídeo
+  userId    Int                           // ID do utilizador que deu like
+  user      User     @relation(fields: [userId], references: [id]) // Liga o like ao utilizador
+
+  @@unique([videoId, userId]) // Impede que o mesmo utilizador dê mais que 1 like no mesmo vídeo
+}
+
+// -----------------------------
+// MODELO DE DEFINIÇÕES DA APP
+// -----------------------------
+model Setting {
+  id         String   @id @default(uuid())    // ID único das definições
+  darkMode   Boolean  @default(false)         // Define se o modo escuro está ativo
+  language   String   @default("pt")          // Língua escolhida pelo utilizador (por defeito "pt")
+
+  userId     Int   @unique                 // Liga as definições a 1 único utilizador
+  user       User     @relation(fields: [userId], references: [id]) // Conexão com o utilizador
+}
