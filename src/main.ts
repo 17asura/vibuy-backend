@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  // Cria a aplicação a partir do AppModule ola
+  // Cria a aplicação a partir do AppModule
   const app = await NestFactory.create(AppModule);
 
   // Ativa a validação automática com class-validator (para DTOs)
