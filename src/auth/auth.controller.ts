@@ -2,6 +2,7 @@ import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from '../users/dto/login.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
@@ -13,10 +14,7 @@ export class AuthController {
     try {
       // Chama o AuthService para criar utilizador
       return await this.authService.register(
-        dto.email,
-        dto.password,
-        dto.username,
-        dto.name,
+        dto
       );
     } catch (error) {
       // Retorna mensagem amigável para o frontend
@@ -28,15 +26,12 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto) {
     try {
-      // Valida email/password
-      const user = await this.authService.validateUser(dto.email, dto.password);
-      if (!user) {
-        throw new BadRequestException('Credenciais inválidas');
-      }
-
-      // Gera JWT
-      return this.authService.login(user);
+      // Chama o AuthService para logar o utilizador
+      return await this.authService.login(
+        dto
+      );
     } catch (error) {
+      // Retorna mensagem amigável para o frontend
       throw new BadRequestException(error.message);
     }
   }

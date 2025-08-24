@@ -1,32 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 // Define a ligação à base de dados
 datasource db {
   provider = "postgresql"          // O tipo de base de dados (PostgreSQL neste caso)
   url      = env("DATABASE_URL")   // A ligação (connection string) vem da variável de ambiente
 }
 
-// Gera o cliente do Prisma para interagir com a DB em JavaScript/TypeScript
-generator client {
-  provider = "prisma-client-js"    // Gera código para usar no NestJS
-}
-
-// -----------------------------
-// MODELO DE UTILIZADOR
-// -----------------------------
 model User {
+  atua            String?
   id              Int       @id @unique @default(autoincrement())   // ID único com autoincremento
   email           String    @unique                                 // Email único (não pode repetir)
   email_verify    Boolean   @default(false)                         // Se o email foi verificado com link
   terms_verify    Boolean   @default(false)                         // Verificação dos termos
   hashed_password String                                            // Password guardada (em hash)
   name            String                                            // Nome do utilizador
-  followers       Int       @default(0)                             // Número de seguidores (inicialmente 0)
   createdAt       DateTime  @default(now())                         // Data/hora em que a conta foi criada
 
   // Relacionamentos
+  followers Follower[] @relation("followers")   // Pessoas que seguem este user
+  following Follower[] @relation("following")   // Pessoas que este user segue
   videos      Video[]                           // Um utilizador pode ter vários vídeos
   comments    Comment[]                         // Um utilizador pode fazer vários comentários
   likes       Like[]                            // Um utilizador pode dar vários likes
   settings    Setting?                          // Cada utilizador pode ter 1 configuração (ou nenhuma ainda)
+}
+
+model Follower {
+  id          Int @id @unique @default(autoincrement())   // ID único com autoincremento
+  
+  // Quem está a seguir
+  followerId  Int
+  follower    User   @relation("following", fields: [followerId], references: [id])
+
+  // Quem está a ser seguido
+  followingId Int
+  following   User   @relation("followers", fields: [followingId], references: [id])
+
+  createdAt   DateTime @default(now())
 }
 
 // -----------------------------
