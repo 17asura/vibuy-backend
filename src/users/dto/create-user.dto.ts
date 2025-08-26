@@ -14,6 +14,7 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Nome não pode estar vazio' }) // garante que não é string vazia ou undefined
   name: string;
 
+  @IsString({message: 'Password must be a string'})
   @IsNotEmpty()
   @MinLength(8, { message: 'Password must be at least 8 characters' })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).*$/, { 

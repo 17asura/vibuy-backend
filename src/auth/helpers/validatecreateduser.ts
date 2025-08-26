@@ -1,6 +1,7 @@
 import { PrismaUserRepository } from "src/users/repositories/prisma/prisma-user-repisitory";
 import { CreateUserDto } from "src/users/dto/create-user.dto";
 import { BadRequestException } from "@nestjs/common";
+import * as bcrypt from 'bcrypt';
 
 // Função para validar os dados de registo de um utilizador
 export async function validateCreatedUser(dto: CreateUserDto) {
@@ -28,7 +29,6 @@ export async function validateCreatedUser(dto: CreateUserDto) {
     }
 
     // 5️⃣ Verifica se a password existe e é forte
-    // Requisitos básicos de segurança: min 8 caracteres, 1 maiúscula, 1 minúscula, 1 número, 1 símbolo
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
     if (!hashed_password || !passwordRegex.test(hashed_password)) {
         throw new BadRequestException(
@@ -43,6 +43,21 @@ export async function validateCreatedUser(dto: CreateUserDto) {
         throw new BadRequestException('Email already in use!');
     }
 
-    // ✅ Se passar todas as validações, retorna true
-    return true;
+    // Hash da password
+    const hashPassword = await bcrypt.hash(dto.hashed_password, 10);
+
+    // Criação do utilizador
+    const user = await userRepository.create({
+        email: dto.email,
+        email_verify: dto.email_verify,
+        terms_verify: dto.terms_verify,
+        hashed_password: hashPassword,
+        name: dto.name
+    });
+
+    // ✅ Retorna o utilizador + mensagem de sucesso
+    return {
+        message: "User successfully created!",
+        user
+    };
 }
