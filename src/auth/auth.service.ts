@@ -15,7 +15,7 @@ export class AuthService {
   ) {}
 
  async validateUser(dto: LoginDto) {
-    await validateLogin(dto);
+    await validateLogin(dto, this.usersService);
   }
 
   // Faz login e gera token JWT
