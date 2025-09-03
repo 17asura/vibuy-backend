@@ -7,7 +7,7 @@ import { PrismaService } from './prisma/prisma.service';
 @Module({
   imports: [
     AuthModule, // Módulo de autenticação
-    UsersModule // Módulo de utilizadores
+    UsersModule, // Módulo de utilizadores
   ],
   providers: [PrismaService], // Disponibiliza Prisma globalmente
   exports: [PrismaService],

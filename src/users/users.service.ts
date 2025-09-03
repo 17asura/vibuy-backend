@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -26,7 +26,11 @@ export class UsersService {
   }
 
   // Buscar utilizador por ID
-  async findOne(id: number) {
+  async findOne(id: String) {
+      // Validar se é UUID válido
+  if (!id || typeof id !== 'string') {
+    throw new BadRequestException('Invalid ID format');
+  }
     return this.prisma.user.findUnique({
       where: { id },
       select: {
@@ -46,12 +50,12 @@ export class UsersService {
   }
 
   // Atualizar utilizador
-  async update(id: number, data: UpdateUserDto) {
+  async update(id: string, data: UpdateUserDto) {
     return this.prisma.user.update({ where: { id }, data });
   }
 
   // Apagar utilizador
-  async remove(id: number) {
+  async remove(id: string) {
     return this.prisma.user.delete({ where: { id } });
   }
 }

@@ -10,7 +10,7 @@ datasource db {
 
 model User {
   atua            String?
-  id              Int       @id @unique @default(autoincrement())   // ID único com autoincremento
+  id              String    @id @default(uuid())                    // ID único
   email           String    @unique                                 // Email único (não pode repetir)
   email_verify    Boolean   @default(false)                         // Se o email foi verificado com link
   terms_verify    Boolean   @default(false)                         // Verificação dos termos
@@ -31,11 +31,11 @@ model Follower {
   id          Int @id @unique @default(autoincrement())   // ID único com autoincremento
   
   // Quem está a seguir
-  followerId  Int
+  followerId  String
   follower    User   @relation("following", fields: [followerId], references: [id])
 
   // Quem está a ser seguido
-  followingId Int
+  followingId String
   following   User   @relation("followers", fields: [followingId], references: [id])
 
   createdAt   DateTime @default(now())
@@ -52,7 +52,7 @@ model Video {
   likesCount  Int       @default(0)            // Contador de likes (para performance)
 
   // Relacionamentos
-  authorId    Int                           // ID do autor do vídeo
+  authorId    String                           // ID do autor do vídeo
   author      User      @relation(fields: [authorId], references: [id]) // Liga o vídeo ao autor
   comments    Comment[]                         // Um vídeo pode ter vários comentários
   likes       Like[]                            // Um vídeo pode ter vários likes
@@ -69,7 +69,7 @@ model Comment {
   // Relacionamentos
   videoId   String                           // ID do vídeo comentado
   video     Video    @relation(fields: [videoId], references: [id]) // Liga o comentário ao vídeo
-  userId    Int                           // ID do utilizador que comentou
+  userId    String                           // ID do utilizador que comentou
   user      User     @relation(fields: [userId], references: [id]) // Liga o comentário ao utilizador
 }
 
@@ -83,7 +83,7 @@ model Like {
   // Relacionamentos
   videoId   String                           // ID do vídeo gostado
   video     Video    @relation(fields: [videoId], references: [id]) // Liga o like ao vídeo
-  userId    Int                           // ID do utilizador que deu like
+  userId    String                           // ID do utilizador que deu like
   user      User     @relation(fields: [userId], references: [id]) // Liga o like ao utilizador
 
   @@unique([videoId, userId]) // Impede que o mesmo utilizador dê mais que 1 like no mesmo vídeo
@@ -97,6 +97,6 @@ model Setting {
   darkMode   Boolean  @default(false)         // Define se o modo escuro está ativo
   language   String   @default("pt")          // Língua escolhida pelo utilizador (por defeito "pt")
 
-  userId     Int   @unique                 // Liga as definições a 1 único utilizador
+  userId     String   @unique                 // Liga as definições a 1 único utilizador
   user       User     @relation(fields: [userId], references: [id]) // Conexão com o utilizador
 }
