@@ -37,6 +37,7 @@ export class UsersService {
         id: true,
         email: true,
         name: true,
+        createdAt: true
         // evita retornar password
       },
     });

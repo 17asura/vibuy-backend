@@ -1,4 +1,4 @@
-import { IsBoolean, IsEmail, IsString, MinLength, IsNotEmpty, Matches } from 'class-validator';
+import { IsBoolean, IsEmail, IsString, MinLength, IsNotEmpty, Matches, IsLowercase } from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail({}, { message: 'Email inválido' })

@@ -10,19 +10,19 @@ export async function validateLogin(
   jwtService: JwtService, // passamos o JwtService
 ) {
   const { email, password } = dto;
-
-  const user = await usersService.findByEmail(email);
+  const email_lowercase = email.toLowerCase();
+  const user = await usersService.findByEmail(email_lowercase);
   if (!user) {
-    throw new UnauthorizedException('Email não encontrado');
+    throw new UnauthorizedException('Password ou e-mail incorreto');
   }
 
   const valid = await bcrypt.compare(password, user.hashed_password);
   if (!valid) {
-    throw new UnauthorizedException('Password incorreta');
+    throw new UnauthorizedException('Password ou e-mail incorreto');
   }
 
   // Cria o payload do token
-  const payload = { email: user.email, id: user.id };
+  const payload = { email: email_lowercase, id: user.id };
 
   return {
     access_token: jwtService.sign(payload), // usamos o jwtService passado

@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 // Função para validar os dados de registo de um utilizador
 export async function validateCreatedUser(dto: CreateUserDto) {
     const { email, email_verify, terms_verify, hashed_password, name } = dto;
-
+    const email_lowercase = email.toLowerCase();
     // 1️⃣ Verifica se o utilizador aceitou os termos e condições
     if (!terms_verify) {
         throw new BadRequestException('You must accept terms and conditions!');
@@ -24,7 +24,7 @@ export async function validateCreatedUser(dto: CreateUserDto) {
 
     // 4️⃣ Valida o email (formato correto)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
+    if (!email_lowercase || !emailRegex.test(email_lowercase)) {
         throw new BadRequestException('Invalid email format!');
     }
 
@@ -38,7 +38,7 @@ export async function validateCreatedUser(dto: CreateUserDto) {
 
     // 6️⃣ Verifica se o email já existe na base de dados
     const userRepository = new PrismaUserRepository();
-    const existingUser = await userRepository.findByEmail(email);
+    const existingUser = await userRepository.findByEmail(email_lowercase);
     if (existingUser) {
         throw new BadRequestException('Email already in use!');
     }
@@ -48,7 +48,7 @@ export async function validateCreatedUser(dto: CreateUserDto) {
 
     // Criação do utilizador
     const user = await userRepository.create({
-        email: dto.email,
+        email: email_lowercase,
         email_verify: dto.email_verify,
         terms_verify: dto.terms_verify,
         hashed_password: hashPassword,
